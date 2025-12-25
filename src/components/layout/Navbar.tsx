@@ -28,6 +28,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { APP_NAME } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/logo.gif";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 const navItems = [
   { href: "/challenges", label: "Challenges", icon: Flag },
@@ -77,6 +78,9 @@ export function Navbar() {
 
         {/* Right Side Actions */}
         <div className="flex items-center gap-2">
+          {/* Notification Bell */}
+          {user && <NotificationBell />}
+          
           {/* Theme Toggle */}
           <Button
             variant="ghost"

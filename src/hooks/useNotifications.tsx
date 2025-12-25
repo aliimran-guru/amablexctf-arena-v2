@@ -15,6 +15,9 @@ export interface Notification {
   created_at: string;
 }
 
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
 export const useNotifications = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -22,18 +25,24 @@ export const useNotifications = () => {
 
   const { data: notifications, isLoading } = useQuery({
     queryKey: ["notifications", user?.id],
-    queryFn: async () => {
+    queryFn: async (): Promise<Notification[]> => {
       if (!user) return [];
       
-      const { data, error } = await supabase
-        .from("notifications")
-        .select("*")
-        .or(`user_id.eq.${user.id},is_global.eq.true`)
-        .order("created_at", { ascending: false })
-        .limit(50);
-
-      if (error) throw error;
-      return data as Notification[];
+      const session = await supabase.auth.getSession();
+      const response = await fetch(
+        `${SUPABASE_URL}/rest/v1/notifications?or=(user_id.eq.${user.id},is_global.eq.true)&order=created_at.desc&limit=50`,
+        {
+          headers: {
+            apikey: SUPABASE_KEY,
+            Authorization: `Bearer ${session.data.session?.access_token}`,
+          },
+        }
+      );
+      
+      if (response.ok) {
+        return await response.json();
+      }
+      return [];
     },
     enabled: !!user,
   });
@@ -83,12 +92,20 @@ export const useNotifications = () => {
 
   const markAsRead = useMutation({
     mutationFn: async (notificationId: string) => {
-      const { error } = await supabase
-        .from("notifications")
-        .update({ is_read: true })
-        .eq("id", notificationId);
-
-      if (error) throw error;
+      const session = await supabase.auth.getSession();
+      await fetch(
+        `${SUPABASE_URL}/rest/v1/notifications?id=eq.${notificationId}`,
+        {
+          method: "PATCH",
+          headers: {
+            apikey: SUPABASE_KEY,
+            Authorization: `Bearer ${session.data.session?.access_token}`,
+            "Content-Type": "application/json",
+            Prefer: "return=minimal",
+          },
+          body: JSON.stringify({ is_read: true }),
+        }
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
@@ -99,13 +116,20 @@ export const useNotifications = () => {
     mutationFn: async () => {
       if (!user) return;
       
-      const { error } = await supabase
-        .from("notifications")
-        .update({ is_read: true })
-        .eq("user_id", user.id)
-        .eq("is_read", false);
-
-      if (error) throw error;
+      const session = await supabase.auth.getSession();
+      await fetch(
+        `${SUPABASE_URL}/rest/v1/notifications?user_id=eq.${user.id}&is_read=eq.false`,
+        {
+          method: "PATCH",
+          headers: {
+            apikey: SUPABASE_KEY,
+            Authorization: `Bearer ${session.data.session?.access_token}`,
+            "Content-Type": "application/json",
+            Prefer: "return=minimal",
+          },
+          body: JSON.stringify({ is_read: true }),
+        }
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
@@ -114,7 +138,7 @@ export const useNotifications = () => {
   });
 
   return {
-    notifications,
+    notifications: notifications || [],
     isLoading,
     unreadCount,
     markAsRead,
@@ -134,21 +158,36 @@ export const useCreateNotification = () => {
       user_id?: string;
       is_global?: boolean;
     }) => {
-      const { error } = await supabase.from("notifications").insert({
-        title: notification.title,
-        message: notification.message,
-        type: notification.type || "info",
-        user_id: notification.user_id || null,
-        is_global: notification.is_global ?? true,
-      });
+      const session = await supabase.auth.getSession();
+      const response = await fetch(
+        `${SUPABASE_URL}/rest/v1/notifications`,
+        {
+          method: "POST",
+          headers: {
+            apikey: SUPABASE_KEY,
+            Authorization: `Bearer ${session.data.session?.access_token}`,
+            "Content-Type": "application/json",
+            Prefer: "return=minimal",
+          },
+          body: JSON.stringify({
+            title: notification.title,
+            message: notification.message,
+            type: notification.type || "info",
+            user_id: notification.user_id || null,
+            is_global: notification.is_global ?? true,
+          }),
+        }
+      );
 
-      if (error) throw error;
+      if (!response.ok) {
+        throw new Error("Failed to create notification");
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
       toast({ title: "Notifikasi berhasil dikirim" });
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
         title: "Gagal mengirim notifikasi",
         description: error.message,
