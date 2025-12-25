@@ -303,6 +303,45 @@ export type Database = {
         }
         Relationships: []
       }
+      registration_tokens: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          current_uses: number | null
+          description: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          max_uses: number | null
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          current_uses?: number | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+          token: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          current_uses?: number | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+          token?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       solves: {
         Row: {
           challenge_id: string
@@ -489,6 +528,35 @@ export type Database = {
         }
         Relationships: []
       }
+      token_usage: {
+        Row: {
+          id: string
+          token_id: string | null
+          used_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          token_id?: string | null
+          used_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          token_id?: string | null
+          used_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "token_usage_token_id_fkey"
+            columns: ["token_id"]
+            isOneToOne: false
+            referencedRelation: "registration_tokens"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       unlocked_hints: {
         Row: {
           hint_id: string
@@ -558,6 +626,14 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      use_registration_token: {
+        Args: { p_token: string; p_user_id: string }
+        Returns: boolean
+      }
+      validate_registration_token: {
+        Args: { p_token: string }
         Returns: boolean
       }
     }
