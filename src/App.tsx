@@ -9,8 +9,6 @@ import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
 import Rules from "./pages/Rules";
 import About from "./pages/About";
 import Dashboard from "./pages/Dashboard";
@@ -43,8 +41,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/rules" element={<Rules />} />
               <Route path="/rules" element={<Rules />} />
               <Route path="/about" element={<About />} />
               <Route path="/scoreboard" element={<Scoreboard />} />
