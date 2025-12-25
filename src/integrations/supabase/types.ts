@@ -157,8 +157,10 @@ export type Database = {
           is_hidden: boolean | null
           max_points: number
           min_points: number
+          scoring_type: string
           solve_count: number | null
           source_url: string | null
+          static_points: number | null
           title: string
           updated_at: string
         }
@@ -179,8 +181,10 @@ export type Database = {
           is_hidden?: boolean | null
           max_points?: number
           min_points?: number
+          scoring_type?: string
           solve_count?: number | null
           source_url?: string | null
+          static_points?: number | null
           title: string
           updated_at?: string
         }
@@ -201,8 +205,10 @@ export type Database = {
           is_hidden?: boolean | null
           max_points?: number
           min_points?: number
+          scoring_type?: string
           solve_count?: number | null
           source_url?: string | null
+          static_points?: number | null
           title?: string
           updated_at?: string
         }

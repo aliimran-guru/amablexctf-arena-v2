@@ -20,6 +20,8 @@ const challengeSchema = z.object({
   flag: z.string().min(1, "Flag is required"),
   category_id: z.string().min(1, "Category is required"),
   difficulty: z.enum(["easy", "medium", "hard", "insane"]),
+  scoring_type: z.enum(["static", "dynamic"]),
+  static_points: z.coerce.number().min(1).max(10000),
   max_points: z.coerce.number().min(1).max(10000),
   min_points: z.coerce.number().min(0),
   decay_rate: z.coerce.number().min(0),
@@ -42,6 +44,8 @@ interface ChallengeFormDialogProps {
     flag: string;
     category_id: string;
     difficulty: string | null;
+    scoring_type?: string;
+    static_points?: number | null;
     max_points: number;
     min_points: number;
     decay_rate: number | null;
@@ -71,6 +75,8 @@ export function ChallengeFormDialog({
       flag: challenge?.flag ?? "",
       category_id: challenge?.category_id ?? "",
       difficulty: (challenge?.difficulty as "easy" | "medium" | "hard" | "insane") ?? "medium",
+      scoring_type: (challenge?.scoring_type as "static" | "dynamic") ?? "dynamic",
+      static_points: challenge?.static_points ?? 100,
       max_points: challenge?.max_points ?? 500,
       min_points: challenge?.min_points ?? 50,
       decay_rate: challenge?.decay_rate ?? 25,
@@ -82,12 +88,17 @@ export function ChallengeFormDialog({
     },
   });
 
+  const scoringType = form.watch("scoring_type");
+
   const onSubmit = async (data: ChallengeFormData) => {
     try {
+      const currentPoints = data.scoring_type === "static" ? data.static_points : data.max_points;
+      
       if (isEditing) {
         await updateChallenge.mutateAsync({
           id: challenge.id,
           ...data,
+          current_points: currentPoints,
           source_url: data.source_url || null,
           docker_image: data.docker_image || null,
           author: data.author || null,
@@ -99,6 +110,8 @@ export function ChallengeFormDialog({
           flag: data.flag,
           category_id: data.category_id,
           difficulty: data.difficulty,
+          scoring_type: data.scoring_type,
+          static_points: data.static_points,
           max_points: data.max_points,
           min_points: data.min_points,
           decay_rate: data.decay_rate,
@@ -107,7 +120,7 @@ export function ChallengeFormDialog({
           source_url: data.source_url || null,
           docker_image: data.docker_image || null,
           author: data.author || null,
-          current_points: data.max_points,
+          current_points: currentPoints,
         });
       }
       onOpenChange(false);
@@ -123,7 +136,7 @@ export function ChallengeFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="font-display">
             {isEditing ? "Edit Challenge" : "Create Challenge"}
           </DialogTitle>
         </DialogHeader>
@@ -234,48 +247,99 @@ export function ChallengeFormDialog({
                 )}
               />
 
+              {/* Scoring Type */}
               <FormField
                 control={form.control}
-                name="max_points"
+                name="scoring_type"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Max Points</FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} />
-                    </FormControl>
+                  <FormItem className="sm:col-span-2">
+                    <FormLabel>Scoring Type</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select scoring type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="dynamic">Dynamic (decreasing points)</SelectItem>
+                        <SelectItem value="static">Static (fixed points)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      {scoringType === "static" 
+                        ? "Fixed points regardless of solve count" 
+                        : "Points decrease as more players solve"}
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="min_points"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Min Points</FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Static Points - only shown for static scoring */}
+              {scoringType === "static" && (
+                <FormField
+                  control={form.control}
+                  name="static_points"
+                  render={({ field }) => (
+                    <FormItem className="sm:col-span-2">
+                      <FormLabel>Points</FormLabel>
+                      <FormControl>
+                        <Input type="number" {...field} />
+                      </FormControl>
+                      <FormDescription>Fixed points awarded for solving</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
-              <FormField
-                control={form.control}
-                name="decay_rate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Decay Rate</FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} />
-                    </FormControl>
-                    <FormDescription>Points deducted per solve</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Dynamic scoring fields - only shown for dynamic scoring */}
+              {scoringType === "dynamic" && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="max_points"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Max Points</FormLabel>
+                        <FormControl>
+                          <Input type="number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="min_points"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Min Points</FormLabel>
+                        <FormControl>
+                          <Input type="number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="decay_rate"
+                    render={({ field }) => (
+                      <FormItem className="sm:col-span-2">
+                        <FormLabel>Decay Rate</FormLabel>
+                        <FormControl>
+                          <Input type="number" {...field} />
+                        </FormControl>
+                        <FormDescription>Points deducted per solve</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
 
               <FormField
                 control={form.control}
@@ -295,7 +359,7 @@ export function ChallengeFormDialog({
                 control={form.control}
                 name="source_url"
                 render={({ field }) => (
-                  <FormItem className="sm:col-span-2">
+                  <FormItem>
                     <FormLabel>Source URL</FormLabel>
                     <FormControl>
                       <Input placeholder="https://..." {...field} />
@@ -373,7 +437,7 @@ export function ChallengeFormDialog({
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending}>
+              <Button type="submit" disabled={isPending} className="gradient-primary">
                 {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isEditing ? "Update" : "Create"}
               </Button>

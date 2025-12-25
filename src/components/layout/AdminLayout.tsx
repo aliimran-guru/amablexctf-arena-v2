@@ -9,6 +9,7 @@ import {
   ScrollText,
   ChevronLeft,
   Key,
+  Trophy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -22,6 +23,7 @@ const adminNavItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/challenges", label: "Challenges", icon: Flag },
   { href: "/admin/users", label: "Users", icon: UserCog },
+  { href: "/admin/scoreboard", label: "Scoreboard", icon: Trophy },
   { href: "/admin/tokens", label: "Tokens", icon: Key },
   { href: "/admin/announcements", label: "Announcements", icon: ScrollText },
   { href: "/admin/settings", label: "Settings", icon: Settings },
