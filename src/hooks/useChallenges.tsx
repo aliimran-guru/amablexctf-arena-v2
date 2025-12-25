@@ -142,6 +142,18 @@ export function useSubmitFlag() {
     }) => {
       if (!user) throw new Error("Not authenticated");
 
+      // Input sanitization - trim and validate flag
+      const sanitizedFlag = flag.trim();
+      if (!sanitizedFlag || sanitizedFlag.length > 500) {
+        throw new Error("Invalid flag format");
+      }
+
+      // Validate challengeId is a valid UUID
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(challengeId)) {
+        throw new Error("Invalid challenge ID");
+      }
+
       // Check if already solved
       const { data: existingSolve } = await supabase
         .from("solves")
@@ -163,12 +175,12 @@ export function useSubmitFlag() {
 
       if (challengeError) throw challengeError;
 
-      // Record the submission
-      const isCorrect = flag.trim() === challenge.flag;
+      // Record the submission (sanitized flag stored)
+      const isCorrect = sanitizedFlag === challenge.flag;
       await supabase.from("submissions").insert({
         user_id: user.id,
         challenge_id: challengeId,
-        submitted_flag: flag,
+        submitted_flag: sanitizedFlag.substring(0, 500), // Truncate for safety
         is_correct: isCorrect,
       });
 
