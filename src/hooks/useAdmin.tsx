@@ -231,6 +231,38 @@ export const useDeleteUser = () => {
   });
 };
 
+// Reset user password (admin) - requires edge function
+export const useResetUserPassword = () => {
+  return useMutation({
+    mutationFn: async ({ userId, newPassword }: { userId: string; newPassword: string }) => {
+      // This requires a server-side function with service role key
+      // For now, we'll use the admin API endpoint
+      const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+      const session = await supabase.auth.getSession();
+      
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/admin-reset-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.data.session?.access_token}`,
+        },
+        body: JSON.stringify({ userId, newPassword }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ error: "Failed to reset password" }));
+        throw new Error(error.error || "Failed to reset password");
+      }
+    },
+    onSuccess: () => {
+      toast({ title: "Password berhasil direset" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Gagal reset password", description: error.message, variant: "destructive" });
+    },
+  });
+};
+
 // Admin Stats
 export const useAdminStats = () => {
   return useQuery({

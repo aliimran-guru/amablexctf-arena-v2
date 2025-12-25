@@ -35,8 +35,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { EmptyState } from "@/components/ui/empty-state";
-import { useAdminUsers, useUpdateUserRole, useUpdateUserProfile, useDeleteUser } from "@/hooks/useAdmin";
-import { Search, MoreHorizontal, Shield, UserCog, User, Pencil, Trash2 } from "lucide-react";
+import { useAdminUsers, useUpdateUserRole, useUpdateUserProfile, useDeleteUser, useResetUserPassword } from "@/hooks/useAdmin";
+import { Search, MoreHorizontal, Shield, UserCog, User, Pencil, Trash2, KeyRound } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 export default function AdminUsers() {
@@ -44,10 +44,13 @@ export default function AdminUsers() {
   const updateRole = useUpdateUserRole();
   const updateProfile = useUpdateUserProfile();
   const deleteUser = useDeleteUser();
+  const resetPassword = useResetUserPassword();
 
   const [search, setSearch] = useState("");
   const [editingUser, setEditingUser] = useState<any>(null);
   const [deletingUser, setDeletingUser] = useState<any>(null);
+  const [resetPasswordUser, setResetPasswordUser] = useState<any>(null);
+  const [newPassword, setNewPassword] = useState("");
   const [editForm, setEditForm] = useState({
     display_name: "",
     bio: "",
@@ -90,6 +93,17 @@ export default function AdminUsers() {
     if (deletingUser) {
       deleteUser.mutate(deletingUser.id);
       setDeletingUser(null);
+    }
+  };
+
+  const handleResetPassword = () => {
+    if (resetPasswordUser && newPassword.length >= 6) {
+      resetPassword.mutate({
+        userId: resetPasswordUser.id,
+        newPassword,
+      });
+      setResetPasswordUser(null);
+      setNewPassword("");
     }
   };
 
@@ -177,6 +191,10 @@ export default function AdminUsers() {
                             <Pencil className="mr-2 h-4 w-4" />
                             Edit Profile
                           </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setResetPasswordUser(user)}>
+                            <KeyRound className="mr-2 h-4 w-4" />
+                            Reset Password
+                          </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuLabel>Manage Role</DropdownMenuLabel>
                           {user.roles.includes("admin") ? (
@@ -259,6 +277,45 @@ export default function AdminUsers() {
             </Button>
             <Button onClick={handleSaveEdit} disabled={updateProfile.isPending}>
               Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Password Dialog */}
+      <Dialog open={!!resetPasswordUser} onOpenChange={() => { setResetPasswordUser(null); setNewPassword(""); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reset Password</DialogTitle>
+            <DialogDescription>
+              Set a new password for @{resetPasswordUser?.username}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="new-password">New Password</Label>
+              <Input
+                id="new-password"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Minimal 6 karakter"
+                minLength={6}
+              />
+              {newPassword.length > 0 && newPassword.length < 6 && (
+                <p className="text-sm text-destructive">Password minimal 6 karakter</p>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setResetPasswordUser(null); setNewPassword(""); }}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleResetPassword} 
+              disabled={resetPassword.isPending || newPassword.length < 6}
+            >
+              Reset Password
             </Button>
           </DialogFooter>
         </DialogContent>
