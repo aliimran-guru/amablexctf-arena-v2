@@ -1,46 +1,46 @@
-# AmablexCTF - Capture The Flag Platform
+# AmablexCTF - Platform Capture The Flag
 
 ![AmablexCTF Logo](src/assets/logo.gif)
 
-A modern, real-time Capture The Flag (CTF) competition platform built with React, TypeScript, and Supabase. AmablexCTF provides a complete solution for hosting cybersecurity competitions with team support, real-time scoring, and comprehensive challenge management.
+Platform kompetisi Capture The Flag (CTF) modern dengan fitur real-time, dibangun menggunakan React, TypeScript, dan Supabase.
 
-## 🚀 Features
+## 🚀 Fitur Utama
 
-### For Players
-- **Multi-Category Challenges**: Web, Crypto, Pwn, Forensics, OSINT, and Misc categories
-- **Dynamic Scoring**: Points decrease as more players solve challenges
-- **Real-time Scoreboard**: Live updates with competition timer
-- **Team System**: Create or join teams, collaborate via built-in chat
-- **Hint System**: Unlock hints by spending points
-- **First Blood Bonus**: Extra points for first solver
-- **User Profiles**: Track your progress and achievements
+### Untuk Pemain
+- **Multi-Kategori Challenge**: Web, Crypto, Pwn, Forensics, OSINT, dan Misc
+- **Dynamic Scoring**: Poin berkurang seiring bertambahnya solver
+- **Real-time Scoreboard**: Update skor secara langsung dengan timer kompetisi
+- **Sistem Tim**: Buat atau gabung tim, chat dengan anggota tim
+- **Sistem Hint**: Buka hint dengan mengorbankan poin
+- **First Blood Bonus**: Poin ekstra untuk solver pertama
+- **Profil User**: Pantau progress dan statistik
 
-### For Administrators
-- **Challenge Management**: Create, edit, and manage challenges with hints and files
-- **Competition Settings**: Configure start/end times, scoring rules, and team sizes
-- **User Management**: Manage player roles and permissions
-- **Announcement System**: Broadcast messages to all participants
+### Untuk Admin
+- **Manajemen Challenge**: Buat, edit, dan kelola challenge
+- **Pengaturan Kompetisi**: Atur waktu mulai/selesai, aturan scoring, ukuran tim
+- **Manajemen User**: Kelola role dan permission pengguna
+- **Sistem Pengumuman**: Broadcast pesan ke semua peserta
 
 ## 🛠️ Tech Stack
 
 - **Frontend**: React 18, TypeScript, Vite
-- **Styling**: Tailwind CSS, shadcn/ui components
+- **Styling**: Tailwind CSS, shadcn/ui
 - **Backend**: Supabase (PostgreSQL, Auth, Realtime)
-- **State Management**: TanStack Query (React Query)
+- **State Management**: TanStack Query
 - **Routing**: React Router v6
 
-## 📦 Installation
+## 📦 Instalasi
 
-### Prerequisites
-- Node.js 18+ and npm
-- A Supabase project (or use Lovable Cloud)
+### Prasyarat
+- Node.js 18+ dan npm
+- Project Supabase (atau gunakan Lovable Cloud)
 
-### Local Development
+### Development Lokal
 
-1. **Clone the repository**
+1. **Clone repository**
    ```bash
-   git clone <YOUR_GIT_URL>
-   cd <YOUR_PROJECT_NAME>
+   git clone <URL_GIT_ANDA>
+   cd <NAMA_PROJECT>
    ```
 
 2. **Install dependencies**
@@ -48,150 +48,78 @@ A modern, real-time Capture The Flag (CTF) competition platform built with React
    npm install
    ```
 
-3. **Set up environment variables**
+3. **Setup environment variables**
    
-   Create a `.env` file in the root directory:
+   Buat file `.env` di root directory:
    ```env
-   VITE_SUPABASE_URL=your_supabase_url
-   VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
+   VITE_SUPABASE_URL=url_supabase_anda
+   VITE_SUPABASE_PUBLISHABLE_KEY=anon_key_supabase_anda
    ```
 
-4. **Start the development server**
+4. **Jalankan development server**
    ```bash
    npm run dev
    ```
 
-5. **Open your browser**
+5. **Buka browser**
    
-   Visit `http://localhost:5173` to see the application.
+   Kunjungi `http://localhost:5173`
 
-## 🗄️ Database Schema
+## 🚢 Cara Deploy
 
-The platform uses the following main tables:
+### Deploy dengan Lovable (Paling Mudah)
 
-- `profiles` - User profiles and scores
-- `challenges` - CTF challenges with flags
-- `categories` - Challenge categories (web, crypto, etc.)
-- `challenge_hints` - Hints for challenges
-- `challenge_files` - Downloadable files for challenges
-- `solves` - User/team solve records
-- `submissions` - All flag submission attempts
-- `teams` - Team information
-- `team_members` - Team membership
-- `team_chat_messages` - Team chat messages
-- `competition_settings` - Competition configuration
-- `announcements` - Admin announcements
-- `user_roles` - Admin/moderator roles
-- `unlocked_hints` - Track unlocked hints per user
+1. Buka project di [Lovable](https://lovable.dev)
+2. Klik **Share** → **Publish**
+3. Selesai! App akan ter-deploy otomatis
 
-## 🚢 Deployment
+### Deploy dengan Docker
 
-### Deploy with Lovable (Recommended)
-
-1. Open your project at [Lovable](https://lovable.dev)
-2. Click **Share** → **Publish**
-3. Your app will be deployed automatically
-
-### Deploy with Docker
-
-1. **Build the Docker image**
+1. **Build Docker image**
    ```bash
    docker build -t amablexctf .
    ```
 
-2. **Run the container**
+2. **Jalankan container**
    ```bash
    docker run -p 80:80 \
-     -e VITE_SUPABASE_URL=your_supabase_url \
-     -e VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key \
+     -e VITE_SUPABASE_URL=url_supabase_anda \
+     -e VITE_SUPABASE_PUBLISHABLE_KEY=anon_key_anda \
      amablexctf
    ```
 
-### Deploy with Docker Compose
+### Deploy ke Vercel
 
-```bash
-docker-compose up -d
-```
-
-### Deploy to Vercel
-
-1. Push your code to GitHub
-2. Import the repository in Vercel
-3. Add environment variables:
-   - `VITE_SUPABASE_URL`
-   - `VITE_SUPABASE_PUBLISHABLE_KEY`
+1. Push code ke GitHub
+2. Import repository di Vercel
+3. Tambahkan environment variables
 4. Deploy!
 
-### Deploy to Netlify
+### Deploy ke Netlify
 
-1. Push your code to GitHub
-2. Connect your repository in Netlify
+1. Push code ke GitHub
+2. Connect repository di Netlify
 3. Set build command: `npm run build`
 4. Set publish directory: `dist`
-5. Add environment variables in Site Settings
+5. Tambahkan environment variables
 6. Deploy!
 
-## 👤 Admin Setup
+## 👤 Setup Admin
 
-To create an admin user:
+Untuk membuat user admin:
 
-1. Register a new account through the app
-2. In your Supabase dashboard, run:
+1. Register akun baru melalui aplikasi
+2. Jalankan SQL berikut di database:
    ```sql
    INSERT INTO public.user_roles (user_id, role)
-   VALUES ('your-user-uuid', 'admin');
+   VALUES ('uuid-user-anda', 'admin');
    ```
-3. Log out and log back in to see the Admin Panel
+3. Logout dan login kembali
 
-## 🔧 Configuration
+## 📄 Lisensi
 
-### Competition Settings
-
-Access the admin panel to configure:
-- Competition name and description
-- Start and end times
-- Maximum team size
-- First blood bonus points
-- Scoreboard freeze time
-
-### Challenge Categories
-
-Default categories:
-- **Web**: Web application security
-- **Crypto**: Cryptography challenges
-- **Pwn**: Binary exploitation
-- **Forensics**: Digital forensics
-- **OSINT**: Open source intelligence
-- **Misc**: Miscellaneous puzzles
-
-## 📱 Screenshots
-
-The platform includes:
-- Beautiful landing page with animated hero section
-- Dashboard with personal statistics
-- Challenge grid with filtering and search
-- Real-time team chat
-- Live scoreboard with rankings
-- Admin panel for management
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is open source and available under the MIT License.
-
-## 🆘 Support
-
-- Create an issue for bug reports or feature requests
-- Check the documentation in Supabase for backend configuration
-- Visit [Lovable Docs](https://docs.lovable.dev) for platform-specific help
+Project ini open source dengan lisensi MIT.
 
 ---
 
-Built with ❤️ using [Lovable](https://lovable.dev)
+Dibuat dengan ❤️ menggunakan [Lovable](https://lovable.dev)
