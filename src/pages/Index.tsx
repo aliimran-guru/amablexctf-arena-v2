@@ -270,7 +270,7 @@ export default function Index() {
               Kategori Challenge
             </Badge>
             <h2 className="text-4xl md:text-5xl font-display font-bold mb-4">
-              PILIH <span className="text-gradient">BATTLEGROUND</span> KAMU
+              PILIH <span className="text-primary neon-text">BATTLEGROUND</span> KAMU
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
               Jelajahi berbagai domain keamanan siber dan uji skill kamu di berbagai disiplin.
@@ -314,7 +314,7 @@ export default function Index() {
               Fitur Platform
             </Badge>
             <h2 className="text-4xl md:text-5xl font-display font-bold mb-4">
-              KENAPA PILIH <span className="text-gradient">{APP_NAME}</span>?
+              KENAPA PILIH <span className="text-primary neon-text">{APP_NAME}</span>?
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
               Platform CTF modern yang dirancang untuk pemula hingga expert.
@@ -352,7 +352,7 @@ export default function Index() {
                 Top Players
               </Badge>
               <h2 className="text-4xl md:text-5xl font-display font-bold mb-4">
-                <span className="text-gradient">ELITE</span> HACKERS
+                <span className="text-primary neon-text">ELITE</span> HACKERS
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
                 Lihat siapa yang memimpin kompetisi saat ini.
@@ -416,7 +416,7 @@ export default function Index() {
             <CardContent className="relative p-12 md:p-16 text-center">
               <div className="max-w-2xl mx-auto">
                 <h2 className="text-4xl md:text-5xl font-display font-bold mb-6">
-                  SIAP UNTUK <span className="text-gradient-cyber neon-text">BERKOMPETISI</span>?
+                  SIAP UNTUK <span className="text-primary neon-text">BERKOMPETISI</span>?
                 </h2>
                 <p className="text-muted-foreground text-lg mb-10">
                   Buat akun dan mulai selesaikan challenge hari ini. Gratis selamanya!
