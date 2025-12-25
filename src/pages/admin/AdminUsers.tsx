@@ -4,19 +4,55 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { EmptyState } from "@/components/ui/empty-state";
-import { useAdminUsers, useUpdateUserRole } from "@/hooks/useAdmin";
-import { Search, MoreHorizontal, Shield, UserCog, User } from "lucide-react";
+import { useAdminUsers, useUpdateUserRole, useUpdateUserProfile, useDeleteUser } from "@/hooks/useAdmin";
+import { Search, MoreHorizontal, Shield, UserCog, User, Pencil, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 export default function AdminUsers() {
   const { data: users, isLoading } = useAdminUsers();
   const updateRole = useUpdateUserRole();
+  const updateProfile = useUpdateUserProfile();
+  const deleteUser = useDeleteUser();
 
   const [search, setSearch] = useState("");
+  const [editingUser, setEditingUser] = useState<any>(null);
+  const [deletingUser, setDeletingUser] = useState<any>(null);
+  const [editForm, setEditForm] = useState({
+    display_name: "",
+    bio: "",
+    score: 0,
+  });
 
   const filteredUsers = users?.filter((u) =>
     u.username.toLowerCase().includes(search.toLowerCase()) ||
@@ -25,6 +61,36 @@ export default function AdminUsers() {
 
   const handleRoleChange = (userId: string, role: "admin" | "moderator", action: "add" | "remove") => {
     updateRole.mutate({ userId, role, action });
+  };
+
+  const handleEdit = (user: any) => {
+    setEditingUser(user);
+    setEditForm({
+      display_name: user.display_name || "",
+      bio: user.bio || "",
+      score: user.score || 0,
+    });
+  };
+
+  const handleSaveEdit = () => {
+    if (editingUser) {
+      updateProfile.mutate({
+        userId: editingUser.id,
+        updates: {
+          display_name: editForm.display_name,
+          bio: editForm.bio,
+          score: editForm.score,
+        },
+      });
+      setEditingUser(null);
+    }
+  };
+
+  const handleDelete = () => {
+    if (deletingUser) {
+      deleteUser.mutate(deletingUser.id);
+      setDeletingUser(null);
+    }
   };
 
   const getRoleBadge = (roles: string[]) => {
@@ -42,7 +108,7 @@ export default function AdminUsers() {
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold">Users</h1>
-          <p className="text-muted-foreground">Manage user accounts and roles</p>
+          <p className="text-muted-foreground">Manage user accounts, roles, and profiles</p>
         </div>
 
         <div className="flex items-center gap-4">
@@ -105,8 +171,14 @@ export default function AdminUsers() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Manage Role</DropdownMenuLabel>
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
                           <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => handleEdit(user)}>
+                            <Pencil className="mr-2 h-4 w-4" />
+                            Edit Profile
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuLabel>Manage Role</DropdownMenuLabel>
                           {user.roles.includes("admin") ? (
                             <DropdownMenuItem onClick={() => handleRoleChange(user.id, "admin", "remove")}>
                               <Shield className="mr-2 h-4 w-4" />
@@ -129,6 +201,14 @@ export default function AdminUsers() {
                               Make Moderator
                             </DropdownMenuItem>
                           )}
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => setDeletingUser(user)}
+                            className="text-destructive"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete User
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -139,6 +219,72 @@ export default function AdminUsers() {
           </div>
         )}
       </div>
+
+      {/* Edit Dialog */}
+      <Dialog open={!!editingUser} onOpenChange={() => setEditingUser(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit User Profile</DialogTitle>
+            <DialogDescription>
+              Update profile for @{editingUser?.username}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Display Name</Label>
+              <Input
+                value={editForm.display_name}
+                onChange={(e) => setEditForm({ ...editForm, display_name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Bio</Label>
+              <Textarea
+                value={editForm.bio}
+                onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Score</Label>
+              <Input
+                type="number"
+                value={editForm.score}
+                onChange={(e) => setEditForm({ ...editForm, score: parseInt(e.target.value) || 0 })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingUser(null)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveEdit} disabled={updateProfile.isPending}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={!!deletingUser} onOpenChange={() => setDeletingUser(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete User?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the user "{deletingUser?.username}" and all their data.
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete User
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 }

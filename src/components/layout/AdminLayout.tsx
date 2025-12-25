@@ -10,6 +10,7 @@ import {
   ChevronLeft,
   Key,
   Trophy,
+  Bell,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -23,7 +24,9 @@ const adminNavItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/challenges", label: "Challenges", icon: Flag },
   { href: "/admin/users", label: "Users", icon: UserCog },
+  { href: "/admin/teams", label: "Teams", icon: Users },
   { href: "/admin/scoreboard", label: "Scoreboard", icon: Trophy },
+  { href: "/admin/notifications", label: "Notifications", icon: Bell },
   { href: "/admin/tokens", label: "Tokens", icon: Key },
   { href: "/admin/announcements", label: "Announcements", icon: ScrollText },
   { href: "/admin/settings", label: "Settings", icon: Settings },

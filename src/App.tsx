@@ -9,6 +9,8 @@ import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Rules from "./pages/Rules";
 import About from "./pages/About";
 import Dashboard from "./pages/Dashboard";
@@ -20,7 +22,9 @@ import Profile from "./pages/Profile";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminChallenges from "./pages/admin/AdminChallenges";
 import AdminUsers from "./pages/admin/AdminUsers";
+import AdminTeams from "./pages/admin/AdminTeams";
 import AdminAnnouncements from "./pages/admin/AdminAnnouncements";
+import AdminNotifications from "./pages/admin/AdminNotifications";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminTokens from "./pages/admin/AdminTokens";
 import AdminScoreboard from "./pages/admin/AdminScoreboard";
@@ -39,6 +43,8 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/rules" element={<Rules />} />
               <Route path="/about" element={<About />} />
               <Route path="/scoreboard" element={<Scoreboard />} />
@@ -50,7 +56,9 @@ const App = () => (
               <Route path="/admin" element={<ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute>} />
               <Route path="/admin/challenges" element={<ProtectedRoute requireAdmin><AdminChallenges /></ProtectedRoute>} />
               <Route path="/admin/users" element={<ProtectedRoute requireAdmin><AdminUsers /></ProtectedRoute>} />
+              <Route path="/admin/teams" element={<ProtectedRoute requireAdmin><AdminTeams /></ProtectedRoute>} />
               <Route path="/admin/announcements" element={<ProtectedRoute requireAdmin><AdminAnnouncements /></ProtectedRoute>} />
+              <Route path="/admin/notifications" element={<ProtectedRoute requireAdmin><AdminNotifications /></ProtectedRoute>} />
               <Route path="/admin/settings" element={<ProtectedRoute requireAdmin><AdminSettings /></ProtectedRoute>} />
               <Route path="/admin/tokens" element={<ProtectedRoute requireAdmin><AdminTokens /></ProtectedRoute>} />
               <Route path="/admin/scoreboard" element={<ProtectedRoute requireAdmin><AdminScoreboard /></ProtectedRoute>} />

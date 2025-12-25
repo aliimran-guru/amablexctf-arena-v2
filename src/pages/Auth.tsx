@@ -338,6 +338,11 @@ export default function Auth() {
                     />
                   </div>
                 </div>
+                <div className="flex justify-end">
+                  <Link to="/forgot-password" className="text-sm text-primary hover:underline">
+                    Lupa password?
+                  </Link>
+                </div>
                 <Button 
                   type="submit" 
                   className="w-full gradient-primary font-display tracking-wide shadow-glow relative z-50 cursor-pointer" 
