@@ -271,26 +271,26 @@ export default function Auth() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden">
-      {/* Background Effects - pointer-events-none ensures they don't block clicks */}
-      <div className="fixed inset-0 cyber-grid opacity-30 pointer-events-none" />
-      <div className="fixed inset-0 matrix-bg pointer-events-none" />
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[100px] animate-pulse pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/15 rounded-full blur-[100px] animate-pulse pointer-events-none" style={{ animationDelay: "1s" }} />
+    <div className="min-h-screen flex items-center justify-center bg-background p-4 relative">
+      {/* Background Effects */}
+      <div className="fixed inset-0 cyber-grid opacity-30 -z-10" />
+      <div className="fixed inset-0 matrix-bg -z-10" />
+      <div className="fixed top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[100px] animate-pulse -z-10" />
+      <div className="fixed bottom-1/4 right-1/4 w-96 h-96 bg-accent/15 rounded-full blur-[100px] animate-pulse -z-10" style={{ animationDelay: "1s" }} />
 
-      <Card className="w-full max-w-md relative card-cyber border-primary/30 z-10">
-        <div className="absolute top-0 left-0 right-0 h-1 gradient-primary" />
+      <Card className="w-full max-w-md card-cyber border-primary/30 relative z-20">
+        <div className="absolute top-0 left-0 right-0 h-1 gradient-primary pointer-events-none" />
         <CardHeader className="text-center">
-          <Link to="/" className="mx-auto mb-4 block">
+          <Link to="/" className="mx-auto mb-4 inline-block">
             <div className="relative inline-block">
-              <div className="absolute inset-0 bg-primary/30 rounded-2xl blur-xl animate-glow" />
+              <div className="absolute inset-0 bg-primary/30 rounded-2xl blur-xl" />
               <img src={logo} alt={APP_NAME} className="relative h-16 w-16 rounded-xl" />
             </div>
           </Link>
           <CardTitle className="text-2xl font-display tracking-wide">{APP_NAME}</CardTitle>
           <CardDescription className="text-muted-foreground">Masuk untuk mulai hacking</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="relative z-30">
           {isRateLimited && (
             <div className="mb-4 p-3 rounded-lg bg-destructive/10 border border-destructive/30 flex items-center gap-2 text-destructive">
               <Shield className="h-4 w-4" />
@@ -299,9 +299,9 @@ export default function Auth() {
           )}
 
           <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6 bg-secondary/50">
-              <TabsTrigger value="signin" className="font-display data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Sign In</TabsTrigger>
-              <TabsTrigger value="signup" className="font-display data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Sign Up</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted relative z-40">
+              <TabsTrigger value="signin" className="font-display relative z-50 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground cursor-pointer">Sign In</TabsTrigger>
+              <TabsTrigger value="signup" className="font-display relative z-50 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground cursor-pointer">Sign Up</TabsTrigger>
             </TabsList>
 
             <TabsContent value="signin">
@@ -340,7 +340,7 @@ export default function Auth() {
                 </div>
                 <Button 
                   type="submit" 
-                  className="w-full gradient-primary font-display tracking-wide shadow-glow" 
+                  className="w-full gradient-primary font-display tracking-wide shadow-glow relative z-50 cursor-pointer" 
                   disabled={isLoading || isRateLimited}
                 >
                   {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : (
@@ -425,7 +425,7 @@ export default function Auth() {
                 </div>
                 <Button 
                   type="submit" 
-                  className="w-full gradient-primary font-display tracking-wide shadow-glow" 
+                  className="w-full gradient-primary font-display tracking-wide shadow-glow relative z-50 cursor-pointer" 
                   disabled={isLoading || isRateLimited}
                 >
                   {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : (
