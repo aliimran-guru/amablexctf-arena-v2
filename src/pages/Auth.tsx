@@ -47,10 +47,17 @@ export default function Auth() {
     e.preventDefault();
     setIsLoading(true);
     const formData = new FormData(e.currentTarget);
-    const email = formData.get("email") as string;
+    const email = (formData.get("email") as string).trim();
     const password = formData.get("password") as string;
-    const username = formData.get("username") as string;
-    const token = formData.get("token") as string;
+    const username = (formData.get("username") as string).trim();
+    const token = (formData.get("token") as string).trim();
+
+    // Input validation
+    if (!email || !password || !username || !token) {
+      toast({ title: "Error", description: "Semua field harus diisi", variant: "destructive" });
+      setIsLoading(false);
+      return;
+    }
 
     if (password.length < 6) {
       toast({ title: "Error", description: "Password minimal 6 karakter", variant: "destructive" });
@@ -58,36 +65,60 @@ export default function Auth() {
       return;
     }
 
-    // Validate registration token
-    const { data: isValid, error: tokenError } = await supabase
-      .rpc('validate_registration_token', { p_token: token });
-
-    if (tokenError || !isValid) {
-      toast({ 
-        title: "Token Tidak Valid", 
-        description: "Token registrasi tidak valid, sudah kadaluarsa, atau sudah mencapai batas penggunaan.", 
-        variant: "destructive" 
-      });
+    if (username.length < 3) {
+      toast({ title: "Error", description: "Username minimal 3 karakter", variant: "destructive" });
       setIsLoading(false);
       return;
     }
 
-    const { error, userId } = await signUp(email, password, username);
-    
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+    try {
+      // Validate registration token
+      const { data: isValid, error: tokenError } = await supabase
+        .rpc('validate_registration_token', { p_token: token });
+
+      if (tokenError) {
+        toast({ 
+          title: "Error Validasi Token", 
+          description: "Gagal memvalidasi token. Coba lagi.", 
+          variant: "destructive" 
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      if (!isValid) {
+        toast({ 
+          title: "Token Tidak Valid", 
+          description: "Token registrasi tidak valid, sudah kadaluarsa, atau sudah mencapai batas penggunaan.", 
+          variant: "destructive" 
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      const { error, userId } = await signUp(email, password, username);
+      
+      if (error) {
+        let errorMessage = error.message;
+        if (error.message.includes("already registered")) {
+          errorMessage = "Email sudah terdaftar. Silakan login.";
+        }
+        toast({ title: "Error", description: errorMessage, variant: "destructive" });
+        setIsLoading(false);
+        return;
+      }
+
+      // Use the token after successful signup
+      if (userId) {
+        await supabase.rpc('use_registration_token', { p_token: token, p_user_id: userId });
+      }
+
       setIsLoading(false);
-      return;
+      toast({ title: "Berhasil!", description: "Akun berhasil dibuat! Silakan login." });
+    } catch (err) {
+      toast({ title: "Error", description: "Terjadi kesalahan. Silakan coba lagi.", variant: "destructive" });
+      setIsLoading(false);
     }
-
-    // Use the token after successful signup
-    if (userId) {
-      await supabase.rpc('use_registration_token', { p_token: token, p_user_id: userId });
-    }
-
-    setIsLoading(false);
-    toast({ title: "Berhasil!", description: "Akun berhasil dibuat! Silakan login." });
-    navigate(from, { replace: true });
   };
 
   return (
