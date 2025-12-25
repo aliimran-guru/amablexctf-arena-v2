@@ -272,11 +272,11 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden">
-      {/* Background Effects */}
-      <div className="fixed inset-0 cyber-grid opacity-30" />
-      <div className="fixed inset-0 matrix-bg" />
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[100px] animate-pulse" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/15 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: "1s" }} />
+      {/* Background Effects - pointer-events-none ensures they don't block clicks */}
+      <div className="fixed inset-0 cyber-grid opacity-30 pointer-events-none" />
+      <div className="fixed inset-0 matrix-bg pointer-events-none" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[100px] animate-pulse pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/15 rounded-full blur-[100px] animate-pulse pointer-events-none" style={{ animationDelay: "1s" }} />
 
       <Card className="w-full max-w-md relative card-cyber border-primary/30 z-10">
         <div className="absolute top-0 left-0 right-0 h-1 gradient-primary" />
