@@ -169,11 +169,16 @@ export function useSubmitFlag() {
       // Get challenge data to verify flag
       const { data: challenge, error: challengeError } = await supabase
         .from("challenges")
-        .select("flag, current_points, solve_count")
+        .select("flag, current_points, solve_count, scoring_type, static_points")
         .eq("id", challengeId)
         .single();
 
       if (challengeError) throw challengeError;
+
+      // Calculate points based on scoring type
+      const pointsToAward = challenge.scoring_type === "static" 
+        ? (challenge.static_points ?? 100)
+        : (challenge.current_points ?? 0);
 
       // Record the submission (sanitized flag stored)
       const isCorrect = sanitizedFlag === challenge.flag;
@@ -202,7 +207,7 @@ export function useSubmitFlag() {
       const { error: solveError } = await supabase.from("solves").insert({
         user_id: user.id,
         challenge_id: challengeId,
-        points_awarded: challenge.current_points ?? 0,
+        points_awarded: pointsToAward,
         is_first_blood: isFirstBlood,
         team_id: teamMember?.team_id ?? null,
       });
@@ -210,7 +215,7 @@ export function useSubmitFlag() {
       if (solveError) throw solveError;
 
       return {
-        points: challenge.current_points ?? 0,
+        points: pointsToAward,
         isFirstBlood,
       };
     },
