@@ -186,8 +186,10 @@ export default function Index() {
 
             {/* Title */}
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-display font-black tracking-tight mb-6 animate-fade-up opacity-0" style={{ animationDelay: "0.2s" }}>
-              <span className="block text-foreground">MASTER THE ART OF</span>
-              <span className="text-gradient-cyber neon-text">CYBERSECURITY</span>
+              <span className="block text-foreground drop-shadow-lg">MASTER THE ART OF</span>
+              <span className="block mt-2 bg-gradient-to-r from-primary via-accent to-category-crypto bg-clip-text text-transparent drop-shadow-[0_0_30px_hsl(142,76%,50%,0.5)]">
+                CYBERSECURITY
+              </span>
             </h1>
 
             {/* Subtitle */}

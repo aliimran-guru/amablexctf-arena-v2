@@ -9,6 +9,8 @@ import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import Rules from "./pages/Rules";
+import About from "./pages/About";
 import Dashboard from "./pages/Dashboard";
 import Challenges from "./pages/Challenges";
 import ChallengeDetail from "./pages/ChallengeDetail";
@@ -20,6 +22,7 @@ import AdminChallenges from "./pages/admin/AdminChallenges";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminAnnouncements from "./pages/admin/AdminAnnouncements";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminTokens from "./pages/admin/AdminTokens";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +38,8 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/rules" element={<Rules />} />
+              <Route path="/about" element={<About />} />
               <Route path="/scoreboard" element={<Scoreboard />} />
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/challenges" element={<ProtectedRoute><Challenges /></ProtectedRoute>} />
@@ -46,6 +51,7 @@ const App = () => (
               <Route path="/admin/users" element={<ProtectedRoute requireAdmin><AdminUsers /></ProtectedRoute>} />
               <Route path="/admin/announcements" element={<ProtectedRoute requireAdmin><AdminAnnouncements /></ProtectedRoute>} />
               <Route path="/admin/settings" element={<ProtectedRoute requireAdmin><AdminSettings /></ProtectedRoute>} />
+              <Route path="/admin/tokens" element={<ProtectedRoute requireAdmin><AdminTokens /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
