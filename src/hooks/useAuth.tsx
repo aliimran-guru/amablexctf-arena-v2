@@ -10,6 +10,7 @@ interface Profile {
   bio: string | null;
   country: string | null;
   score: number;
+  created_at: string;
 }
 
 interface AuthContextType {

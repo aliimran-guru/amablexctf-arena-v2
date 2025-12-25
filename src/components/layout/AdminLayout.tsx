@@ -21,9 +21,8 @@ const adminNavItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/challenges", label: "Challenges", icon: Flag },
   { href: "/admin/users", label: "Users", icon: UserCog },
-  { href: "/admin/teams", label: "Teams", icon: Users },
+  { href: "/admin/announcements", label: "Announcements", icon: ScrollText },
   { href: "/admin/settings", label: "Settings", icon: Settings },
-  { href: "/admin/logs", label: "Logs", icon: ScrollText },
 ];
 
 export function AdminLayout({ children }: AdminLayoutProps) {

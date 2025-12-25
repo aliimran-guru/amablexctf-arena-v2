@@ -90,8 +90,16 @@ export function useUserSolves() {
 
       const { data, error } = await supabase
         .from("solves")
-        .select("challenge_id, points_awarded, is_first_blood, solved_at")
-        .eq("user_id", user.id);
+        .select(`
+          id,
+          challenge_id, 
+          points_awarded, 
+          is_first_blood, 
+          solved_at,
+          challenges:challenge_id(title, categories:category_id(name))
+        `)
+        .eq("user_id", user.id)
+        .order("solved_at", { ascending: false });
 
       if (error) throw error;
       return data;
