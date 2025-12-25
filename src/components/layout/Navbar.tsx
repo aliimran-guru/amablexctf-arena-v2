@@ -27,6 +27,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { APP_NAME } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import logo from "@/assets/logo.gif";
 
 const navItems = [
   { href: "/challenges", label: "Challenges", icon: Flag },
@@ -51,9 +52,7 @@ export function Navbar() {
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <Link to={user ? "/dashboard" : "/"} className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg gradient-primary">
-            <Flag className="h-4 w-4 text-primary-foreground" />
-          </div>
+          <img src={logo} alt={APP_NAME} className="h-8 w-8 rounded-lg" />
           <span className="font-bold text-lg tracking-tight">{APP_NAME}</span>
         </Link>
 

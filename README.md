@@ -1,73 +1,197 @@
-# Welcome to your Lovable project
+# AmablexCTF - Capture The Flag Platform
 
-## Project info
+![AmablexCTF Logo](src/assets/logo.gif)
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+A modern, real-time Capture The Flag (CTF) competition platform built with React, TypeScript, and Supabase. AmablexCTF provides a complete solution for hosting cybersecurity competitions with team support, real-time scoring, and comprehensive challenge management.
 
-## How can I edit this code?
+## 🚀 Features
 
-There are several ways of editing your application.
+### For Players
+- **Multi-Category Challenges**: Web, Crypto, Pwn, Forensics, OSINT, and Misc categories
+- **Dynamic Scoring**: Points decrease as more players solve challenges
+- **Real-time Scoreboard**: Live updates with competition timer
+- **Team System**: Create or join teams, collaborate via built-in chat
+- **Hint System**: Unlock hints by spending points
+- **First Blood Bonus**: Extra points for first solver
+- **User Profiles**: Track your progress and achievements
 
-**Use Lovable**
+### For Administrators
+- **Challenge Management**: Create, edit, and manage challenges with hints and files
+- **Competition Settings**: Configure start/end times, scoring rules, and team sizes
+- **User Management**: Manage player roles and permissions
+- **Announcement System**: Broadcast messages to all participants
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## 🛠️ Tech Stack
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Frontend**: React 18, TypeScript, Vite
+- **Styling**: Tailwind CSS, shadcn/ui components
+- **Backend**: Supabase (PostgreSQL, Auth, Realtime)
+- **State Management**: TanStack Query (React Query)
+- **Routing**: React Router v6
 
-**Use your preferred IDE**
+## 📦 Installation
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Prerequisites
+- Node.js 18+ and npm
+- A Supabase project (or use Lovable Cloud)
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Local Development
 
-Follow these steps:
+1. **Clone the repository**
+   ```bash
+   git clone <YOUR_GIT_URL>
+   cd <YOUR_PROJECT_NAME>
+   ```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+3. **Set up environment variables**
+   
+   Create a `.env` file in the root directory:
+   ```env
+   VITE_SUPABASE_URL=your_supabase_url
+   VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
+   ```
 
-# Step 3: Install the necessary dependencies.
-npm i
+4. **Start the development server**
+   ```bash
+   npm run dev
+   ```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+5. **Open your browser**
+   
+   Visit `http://localhost:5173` to see the application.
+
+## 🗄️ Database Schema
+
+The platform uses the following main tables:
+
+- `profiles` - User profiles and scores
+- `challenges` - CTF challenges with flags
+- `categories` - Challenge categories (web, crypto, etc.)
+- `challenge_hints` - Hints for challenges
+- `challenge_files` - Downloadable files for challenges
+- `solves` - User/team solve records
+- `submissions` - All flag submission attempts
+- `teams` - Team information
+- `team_members` - Team membership
+- `team_chat_messages` - Team chat messages
+- `competition_settings` - Competition configuration
+- `announcements` - Admin announcements
+- `user_roles` - Admin/moderator roles
+- `unlocked_hints` - Track unlocked hints per user
+
+## 🚢 Deployment
+
+### Deploy with Lovable (Recommended)
+
+1. Open your project at [Lovable](https://lovable.dev)
+2. Click **Share** → **Publish**
+3. Your app will be deployed automatically
+
+### Deploy with Docker
+
+1. **Build the Docker image**
+   ```bash
+   docker build -t amablexctf .
+   ```
+
+2. **Run the container**
+   ```bash
+   docker run -p 80:80 \
+     -e VITE_SUPABASE_URL=your_supabase_url \
+     -e VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key \
+     amablexctf
+   ```
+
+### Deploy with Docker Compose
+
+```bash
+docker-compose up -d
 ```
 
-**Edit a file directly in GitHub**
+### Deploy to Vercel
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+1. Push your code to GitHub
+2. Import the repository in Vercel
+3. Add environment variables:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_PUBLISHABLE_KEY`
+4. Deploy!
 
-**Use GitHub Codespaces**
+### Deploy to Netlify
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+1. Push your code to GitHub
+2. Connect your repository in Netlify
+3. Set build command: `npm run build`
+4. Set publish directory: `dist`
+5. Add environment variables in Site Settings
+6. Deploy!
 
-## What technologies are used for this project?
+## 👤 Admin Setup
 
-This project is built with:
+To create an admin user:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+1. Register a new account through the app
+2. In your Supabase dashboard, run:
+   ```sql
+   INSERT INTO public.user_roles (user_id, role)
+   VALUES ('your-user-uuid', 'admin');
+   ```
+3. Log out and log back in to see the Admin Panel
 
-## How can I deploy this project?
+## 🔧 Configuration
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+### Competition Settings
 
-## Can I connect a custom domain to my Lovable project?
+Access the admin panel to configure:
+- Competition name and description
+- Start and end times
+- Maximum team size
+- First blood bonus points
+- Scoreboard freeze time
 
-Yes, you can!
+### Challenge Categories
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Default categories:
+- **Web**: Web application security
+- **Crypto**: Cryptography challenges
+- **Pwn**: Binary exploitation
+- **Forensics**: Digital forensics
+- **OSINT**: Open source intelligence
+- **Misc**: Miscellaneous puzzles
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## 📱 Screenshots
+
+The platform includes:
+- Beautiful landing page with animated hero section
+- Dashboard with personal statistics
+- Challenge grid with filtering and search
+- Real-time team chat
+- Live scoreboard with rankings
+- Admin panel for management
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is open source and available under the MIT License.
+
+## 🆘 Support
+
+- Create an issue for bug reports or feature requests
+- Check the documentation in Supabase for backend configuration
+- Visit [Lovable Docs](https://docs.lovable.dev) for platform-specific help
+
+---
+
+Built with ❤️ using [Lovable](https://lovable.dev)
