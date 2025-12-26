@@ -126,6 +126,22 @@ export const useNotifications = () => {
   };
 };
 
+// Admin hook to get all notifications
+export const useAdminNotifications = () => {
+  return useQuery({
+    queryKey: ["admin", "notifications"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data as Notification[];
+    },
+  });
+};
+
 // Admin hook to create notifications
 export const useCreateNotification = () => {
   const queryClient = useQueryClient();
@@ -152,11 +168,74 @@ export const useCreateNotification = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "notifications"] });
       toast({ title: "Notifikasi berhasil dikirim" });
     },
     onError: (error: Error) => {
       toast({
         title: "Gagal mengirim notifikasi",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+};
+
+// Admin hook to update notifications
+export const useUpdateNotification = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      updates,
+    }: {
+      id: string;
+      updates: { title?: string; message?: string; type?: string };
+    }) => {
+      const { error } = await supabase
+        .from("notifications")
+        .update(updates)
+        .eq("id", id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "notifications"] });
+      toast({ title: "Notifikasi berhasil diupdate" });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Gagal update notifikasi",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+};
+
+// Admin hook to delete notifications
+export const useDeleteNotification = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("notifications")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "notifications"] });
+      toast({ title: "Notifikasi berhasil dihapus" });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Gagal hapus notifikasi",
         description: error.message,
         variant: "destructive",
       });

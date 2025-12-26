@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -12,13 +14,49 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
-import { useCreateNotification } from "@/hooks/useNotifications";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { EmptyState } from "@/components/ui/empty-state";
+import { 
+  useAdminNotifications, 
+  useCreateNotification, 
+  useUpdateNotification, 
+  useDeleteNotification,
+  type Notification 
+} from "@/hooks/useNotifications";
 import { useAdminUsers } from "@/hooks/useAdmin";
-import { Bell, Send, Users } from "lucide-react";
+import { Bell, Send, Users, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 
 export default function AdminNotifications() {
+  const { data: notifications, isLoading } = useAdminNotifications();
   const createNotification = useCreateNotification();
+  const updateNotification = useUpdateNotification();
+  const deleteNotification = useDeleteNotification();
   const { data: users } = useAdminUsers();
   
   const [title, setTitle] = useState("");
@@ -26,6 +64,10 @@ export default function AdminNotifications() {
   const [type, setType] = useState("info");
   const [isGlobal, setIsGlobal] = useState(true);
   const [selectedUserId, setSelectedUserId] = useState<string>("");
+
+  const [editingNotification, setEditingNotification] = useState<Notification | null>(null);
+  const [deletingNotification, setDeletingNotification] = useState<Notification | null>(null);
+  const [editForm, setEditForm] = useState({ title: "", message: "", type: "info" });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,6 +90,49 @@ export default function AdminNotifications() {
     setSelectedUserId("");
   };
 
+  const handleEdit = (notification: Notification) => {
+    setEditingNotification(notification);
+    setEditForm({
+      title: notification.title,
+      message: notification.message,
+      type: notification.type,
+    });
+  };
+
+  const handleSaveEdit = () => {
+    if (editingNotification) {
+      updateNotification.mutate({
+        id: editingNotification.id,
+        updates: {
+          title: editForm.title,
+          message: editForm.message,
+          type: editForm.type,
+        },
+      });
+      setEditingNotification(null);
+    }
+  };
+
+  const handleDelete = () => {
+    if (deletingNotification) {
+      deleteNotification.mutate(deletingNotification.id);
+      setDeletingNotification(null);
+    }
+  };
+
+  const getTypeBadge = (notificationType: string) => {
+    switch (notificationType) {
+      case "success":
+        return <Badge className="bg-green-500/10 text-green-500 border-green-500/20">Success</Badge>;
+      case "warning":
+        return <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20">Warning</Badge>;
+      case "error":
+        return <Badge className="bg-red-500/10 text-red-500 border-red-500/20">Error</Badge>;
+      default:
+        return <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">Info</Badge>;
+    }
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -56,10 +141,11 @@ export default function AdminNotifications() {
             <Bell className="h-6 w-6" />
             Notifications
           </h1>
-          <p className="text-muted-foreground">Send real-time notifications to participants</p>
+          <p className="text-muted-foreground">Send and manage real-time notifications</p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid lg:grid-cols-2 gap-6">
+          {/* Create Notification Form */}
           <Card>
             <CardHeader>
               <CardTitle>Send Notification</CardTitle>
@@ -150,76 +236,155 @@ export default function AdminNotifications() {
             </CardContent>
           </Card>
 
+          {/* Notification List */}
           <Card>
             <CardHeader>
-              <CardTitle>Tips</CardTitle>
+              <CardTitle>Sent Notifications</CardTitle>
               <CardDescription>
-                Best practices for notifications
+                Manage existing notifications
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex gap-3">
-                <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0">
-                  <span className="text-blue-500 text-sm font-bold">i</span>
+            <CardContent>
+              {isLoading ? (
+                <LoadingSpinner />
+              ) : !notifications?.length ? (
+                <EmptyState
+                  icon={<Bell className="h-8 w-8 text-muted-foreground" />}
+                  title="No notifications"
+                  description="No notifications have been sent yet"
+                />
+              ) : (
+                <div className="border rounded-lg max-h-[400px] overflow-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Title</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Sent</TableHead>
+                        <TableHead className="w-[50px]"></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {notifications.map((notification) => (
+                        <TableRow key={notification.id}>
+                          <TableCell>
+                            <div>
+                              <div className="font-medium line-clamp-1">{notification.title}</div>
+                              <div className="text-sm text-muted-foreground line-clamp-1">
+                                {notification.message}
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {getTypeBadge(notification.type)}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-sm">
+                            {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
+                          </TableCell>
+                          <TableCell>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => handleEdit(notification)}>
+                                  <Pencil className="mr-2 h-4 w-4" />
+                                  Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={() => setDeletingNotification(notification)}
+                                  className="text-destructive"
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 </div>
-                <div>
-                  <p className="font-medium">Info</p>
-                  <p className="text-sm text-muted-foreground">
-                    Use for general announcements, updates, or reminders.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <div className="h-8 w-8 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
-                  <span className="text-green-500 text-sm font-bold">✓</span>
-                </div>
-                <div>
-                  <p className="font-medium">Success</p>
-                  <p className="text-sm text-muted-foreground">
-                    Use when something positive happens, like a new challenge release.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <div className="h-8 w-8 rounded-full bg-yellow-500/10 flex items-center justify-center shrink-0">
-                  <span className="text-yellow-500 text-sm font-bold">!</span>
-                </div>
-                <div>
-                  <p className="font-medium">Warning</p>
-                  <p className="text-sm text-muted-foreground">
-                    Use for important notices that need attention.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <div className="h-8 w-8 rounded-full bg-red-500/10 flex items-center justify-center shrink-0">
-                  <span className="text-red-500 text-sm font-bold">✕</span>
-                </div>
-                <div>
-                  <p className="font-medium">Error</p>
-                  <p className="text-sm text-muted-foreground">
-                    Use for critical issues or service disruptions.
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-6 p-4 bg-muted rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <Users className="h-4 w-4" />
-                  <span className="font-medium">Real-time Delivery</span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Notifications are delivered instantly to all online users via WebSocket.
-                  Users will see a toast notification and the bell icon will update.
-                </p>
-              </div>
+              )}
             </CardContent>
           </Card>
         </div>
       </div>
+
+      {/* Edit Dialog */}
+      <Dialog open={!!editingNotification} onOpenChange={() => setEditingNotification(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Notification</DialogTitle>
+            <DialogDescription>
+              Update notification content
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Title</Label>
+              <Input
+                value={editForm.title}
+                onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Message</Label>
+              <Textarea
+                value={editForm.message}
+                onChange={(e) => setEditForm({ ...editForm, message: e.target.value })}
+                rows={4}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Type</Label>
+              <Select value={editForm.type} onValueChange={(v) => setEditForm({ ...editForm, type: v })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="info">Info</SelectItem>
+                  <SelectItem value="success">Success</SelectItem>
+                  <SelectItem value="warning">Warning</SelectItem>
+                  <SelectItem value="error">Error</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingNotification(null)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveEdit} disabled={updateNotification.isPending}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={!!deletingNotification} onOpenChange={() => setDeletingNotification(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Notification?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this notification. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 }

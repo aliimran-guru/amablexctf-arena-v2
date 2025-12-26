@@ -4,12 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ChallengeFormDialog } from "@/components/admin/ChallengeFormDialog";
-import { useAdminChallenges, useDeleteChallenge } from "@/hooks/useAdminChallenges";
+import { useAdminChallenges, useDeleteChallenge, useBulkUpdateChallenges } from "@/hooks/useAdminChallenges";
 import { Plus, Search, MoreHorizontal, Pencil, Trash2, Eye, EyeOff, Flag } from "lucide-react";
 import { DifficultyBadge } from "@/components/ui/difficulty-badge";
 import type { DifficultyLevel } from "@/lib/constants";
@@ -17,11 +18,13 @@ import type { DifficultyLevel } from "@/lib/constants";
 export default function AdminChallenges() {
   const { data: challenges, isLoading } = useAdminChallenges();
   const deleteChallenge = useDeleteChallenge();
+  const bulkUpdate = useBulkUpdateChallenges();
   
   const [search, setSearch] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editingChallenge, setEditingChallenge] = useState<typeof challenges[0] | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const filteredChallenges = challenges?.filter((c) =>
     c.title.toLowerCase().includes(search.toLowerCase())
@@ -44,6 +47,39 @@ export default function AdminChallenges() {
     if (!open) setEditingChallenge(null);
   };
 
+  const handleSelectAll = (checked: boolean) => {
+    if (checked && filteredChallenges) {
+      setSelectedIds(filteredChallenges.map((c) => c.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  const handleSelectOne = (id: string, checked: boolean) => {
+    if (checked) {
+      setSelectedIds([...selectedIds, id]);
+    } else {
+      setSelectedIds(selectedIds.filter((i) => i !== id));
+    }
+  };
+
+  const handleBulkShow = () => {
+    if (selectedIds.length > 0) {
+      bulkUpdate.mutate({ ids: selectedIds, updates: { is_hidden: false } });
+      setSelectedIds([]);
+    }
+  };
+
+  const handleBulkHide = () => {
+    if (selectedIds.length > 0) {
+      bulkUpdate.mutate({ ids: selectedIds, updates: { is_hidden: true } });
+      setSelectedIds([]);
+    }
+  };
+
+  const isAllSelected = filteredChallenges && filteredChallenges.length > 0 && 
+    selectedIds.length === filteredChallenges.length;
+
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -60,7 +96,7 @@ export default function AdminChallenges() {
           </Button>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -70,6 +106,34 @@ export default function AdminChallenges() {
               className="pl-9"
             />
           </div>
+          
+          {selectedIds.length > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">
+                {selectedIds.length} selected
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleBulkShow}
+                disabled={bulkUpdate.isPending}
+                className="gap-1"
+              >
+                <Eye className="h-4 w-4" />
+                Show
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleBulkHide}
+                disabled={bulkUpdate.isPending}
+                className="gap-1"
+              >
+                <EyeOff className="h-4 w-4" />
+                Hide
+              </Button>
+            </div>
+          )}
         </div>
 
         {isLoading ? (
@@ -85,6 +149,13 @@ export default function AdminChallenges() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-[50px]">
+                    <Checkbox
+                      checked={isAllSelected}
+                      onCheckedChange={handleSelectAll}
+                      aria-label="Select all"
+                    />
+                  </TableHead>
                   <TableHead>Title</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead>Difficulty</TableHead>
@@ -97,6 +168,15 @@ export default function AdminChallenges() {
               <TableBody>
                 {filteredChallenges.map((challenge) => (
                   <TableRow key={challenge.id}>
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedIds.includes(challenge.id)}
+                        onCheckedChange={(checked) =>
+                          handleSelectOne(challenge.id, checked as boolean)
+                        }
+                        aria-label={`Select ${challenge.title}`}
+                      />
+                    </TableCell>
                     <TableCell className="font-medium">
                       {challenge.title}
                     </TableCell>

@@ -100,6 +100,35 @@ export function useDeleteChallenge() {
   });
 }
 
+export function useBulkUpdateChallenges() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      ids,
+      updates,
+    }: {
+      ids: string[];
+      updates: { is_hidden?: boolean; is_active?: boolean };
+    }) => {
+      const { error } = await supabase
+        .from("challenges")
+        .update(updates)
+        .in("id", ids);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-challenges"] });
+      queryClient.invalidateQueries({ queryKey: ["challenges"] });
+      toast.success("Challenges updated successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+}
+
 export function useCreateHint() {
   const queryClient = useQueryClient();
 
