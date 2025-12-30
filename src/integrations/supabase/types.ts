@@ -163,6 +163,7 @@ export type Database = {
           static_points: number | null
           title: string
           updated_at: string
+          wave_id: string | null
         }
         Insert: {
           author?: string | null
@@ -187,6 +188,7 @@ export type Database = {
           static_points?: number | null
           title: string
           updated_at?: string
+          wave_id?: string | null
         }
         Update: {
           author?: string | null
@@ -211,6 +213,7 @@ export type Database = {
           static_points?: number | null
           title?: string
           updated_at?: string
+          wave_id?: string | null
         }
         Relationships: [
           {
@@ -218,6 +221,13 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challenges_wave_id_fkey"
+            columns: ["wave_id"]
+            isOneToOne: false
+            referencedRelation: "waves"
             referencedColumns: ["id"]
           },
         ]
@@ -643,6 +653,42 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      waves: {
+        Row: {
+          created_at: string
+          description: string | null
+          duration_hours: number
+          id: string
+          is_active: boolean
+          name: string
+          start_time: string | null
+          updated_at: string
+          wave_number: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          duration_hours?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          start_time?: string | null
+          updated_at?: string
+          wave_number: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          duration_hours?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          start_time?: string | null
+          updated_at?: string
+          wave_number?: number
         }
         Relationships: []
       }

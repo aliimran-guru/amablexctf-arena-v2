@@ -26,6 +26,7 @@ import AdminNotifications from "./pages/admin/AdminNotifications";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminTokens from "./pages/admin/AdminTokens";
 import AdminScoreboard from "./pages/admin/AdminScoreboard";
+import AdminWaves from "./pages/admin/AdminWaves";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -59,6 +60,7 @@ const App = () => (
               <Route path="/admin/settings" element={<ProtectedRoute requireAdmin><AdminSettings /></ProtectedRoute>} />
               <Route path="/admin/tokens" element={<ProtectedRoute requireAdmin><AdminTokens /></ProtectedRoute>} />
               <Route path="/admin/scoreboard" element={<ProtectedRoute requireAdmin><AdminScoreboard /></ProtectedRoute>} />
+              <Route path="/admin/waves" element={<ProtectedRoute requireAdmin><AdminWaves /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

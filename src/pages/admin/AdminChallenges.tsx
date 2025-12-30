@@ -10,14 +10,17 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ChallengeFormDialog } from "@/components/admin/ChallengeFormDialog";
-import { useAdminChallenges, useDeleteChallenge, useBulkUpdateChallenges } from "@/hooks/useAdminChallenges";
+import { useAdminChallenges, useDeleteChallenge, useBulkUpdateChallenges, useUpdateChallenge } from "@/hooks/useAdminChallenges";
+import { useWaves } from "@/hooks/useWaves";
 import { Plus, Search, MoreHorizontal, Pencil, Trash2, Eye, EyeOff, Flag } from "lucide-react";
 import { DifficultyBadge } from "@/components/ui/difficulty-badge";
 import type { DifficultyLevel } from "@/lib/constants";
 
 export default function AdminChallenges() {
   const { data: challenges, isLoading } = useAdminChallenges();
+  const { data: waves = [] } = useWaves();
   const deleteChallenge = useDeleteChallenge();
+  const updateChallenge = useUpdateChallenge();
   const bulkUpdate = useBulkUpdateChallenges();
   
   const [search, setSearch] = useState("");
@@ -75,6 +78,16 @@ export default function AdminChallenges() {
       bulkUpdate.mutate({ ids: selectedIds, updates: { is_hidden: true } });
       setSelectedIds([]);
     }
+  };
+
+  const handleToggleVisibility = (id: string, currentHidden: boolean) => {
+    updateChallenge.mutate({ id, is_hidden: !currentHidden });
+  };
+
+  const getWaveName = (waveId: string | null) => {
+    if (!waveId) return null;
+    const wave = waves.find(w => w.id === waveId);
+    return wave ? `Wave ${wave.wave_number}` : null;
   };
 
   const isAllSelected = filteredChallenges && filteredChallenges.length > 0 && 
@@ -158,10 +171,12 @@ export default function AdminChallenges() {
                   </TableHead>
                   <TableHead>Title</TableHead>
                   <TableHead>Category</TableHead>
+                  <TableHead>Wave</TableHead>
                   <TableHead>Difficulty</TableHead>
                   <TableHead className="text-right">Points</TableHead>
                   <TableHead className="text-right">Solves</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Visibility</TableHead>
                   <TableHead className="w-[50px]"></TableHead>
                 </TableRow>
               </TableHeader>
@@ -182,6 +197,13 @@ export default function AdminChallenges() {
                     </TableCell>
                     <TableCell>{challenge.categories?.name}</TableCell>
                     <TableCell>
+                      {getWaveName(challenge.wave_id) ? (
+                        <Badge variant="outline">{getWaveName(challenge.wave_id)}</Badge>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
                       {challenge.difficulty && (
                         <DifficultyBadge
                           difficulty={challenge.difficulty as DifficultyLevel}
@@ -195,16 +217,32 @@ export default function AdminChallenges() {
                       {challenge.solve_count ?? 0}
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
-                        {challenge.is_active ? (
-                          <Badge variant="default">Active</Badge>
+                      {challenge.is_active ? (
+                        <Badge variant="default">Active</Badge>
+                      ) : (
+                        <Badge variant="secondary">Inactive</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleToggleVisibility(challenge.id, !!challenge.is_hidden)}
+                        disabled={updateChallenge.isPending}
+                        className="gap-1"
+                      >
+                        {challenge.is_hidden ? (
+                          <>
+                            <EyeOff className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-xs">Hidden</span>
+                          </>
                         ) : (
-                          <Badge variant="secondary">Inactive</Badge>
+                          <>
+                            <Eye className="h-4 w-4 text-green-500" />
+                            <span className="text-xs">Visible</span>
+                          </>
                         )}
-                        {challenge.is_hidden && (
-                          <EyeOff className="h-4 w-4 text-muted-foreground" />
-                        )}
-                      </div>
+                      </Button>
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
@@ -217,6 +255,21 @@ export default function AdminChallenges() {
                           <DropdownMenuItem onClick={() => handleEdit(challenge)}>
                             <Pencil className="mr-2 h-4 w-4" />
                             Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleToggleVisibility(challenge.id, !!challenge.is_hidden)}
+                          >
+                            {challenge.is_hidden ? (
+                              <>
+                                <Eye className="mr-2 h-4 w-4" />
+                                Show
+                              </>
+                            ) : (
+                              <>
+                                <EyeOff className="mr-2 h-4 w-4" />
+                                Hide
+                              </>
+                            )}
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
