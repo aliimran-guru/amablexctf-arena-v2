@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Loader2 } from "lucide-react";
 import { useCategories } from "@/hooks/useChallenges";
 import { useCreateChallenge, useUpdateChallenge } from "@/hooks/useAdminChallenges";
+import { useWaves } from "@/hooks/useWaves";
 import { DIFFICULTIES } from "@/lib/constants";
 
 const challengeSchema = z.object({
@@ -19,6 +20,7 @@ const challengeSchema = z.object({
   description: z.string().min(1, "Description is required"),
   flag: z.string().min(1, "Flag is required"),
   category_id: z.string().min(1, "Category is required"),
+  wave_id: z.string().optional(),
   difficulty: z.enum(["easy", "medium", "hard", "insane"]),
   scoring_type: z.enum(["static", "dynamic"]),
   static_points: z.coerce.number().min(1).max(10000),
@@ -43,6 +45,7 @@ interface ChallengeFormDialogProps {
     description: string;
     flag: string;
     category_id: string;
+    wave_id?: string | null;
     difficulty: string | null;
     scoring_type?: string;
     static_points?: number | null;
@@ -63,6 +66,7 @@ export function ChallengeFormDialog({
   challenge,
 }: ChallengeFormDialogProps) {
   const { data: categories = [] } = useCategories();
+  const { data: waves = [] } = useWaves();
   const createChallenge = useCreateChallenge();
   const updateChallenge = useUpdateChallenge();
   const isEditing = !!challenge;
@@ -74,6 +78,7 @@ export function ChallengeFormDialog({
       description: challenge?.description ?? "",
       flag: challenge?.flag ?? "",
       category_id: challenge?.category_id ?? "",
+      wave_id: challenge?.wave_id ?? "",
       difficulty: (challenge?.difficulty as "easy" | "medium" | "hard" | "insane") ?? "medium",
       scoring_type: (challenge?.scoring_type as "static" | "dynamic") ?? "dynamic",
       static_points: challenge?.static_points ?? 100,
@@ -93,11 +98,13 @@ export function ChallengeFormDialog({
   const onSubmit = async (data: ChallengeFormData) => {
     try {
       const currentPoints = data.scoring_type === "static" ? data.static_points : data.max_points;
+      const waveId = data.wave_id && data.wave_id !== "" ? data.wave_id : null;
       
       if (isEditing) {
         await updateChallenge.mutateAsync({
           id: challenge.id,
           ...data,
+          wave_id: waveId,
           current_points: currentPoints,
           source_url: data.source_url || null,
           docker_image: data.docker_image || null,
@@ -109,6 +116,7 @@ export function ChallengeFormDialog({
           description: data.description,
           flag: data.flag,
           category_id: data.category_id,
+          wave_id: waveId,
           difficulty: data.difficulty,
           scoring_type: data.scoring_type,
           static_points: data.static_points,
@@ -174,6 +182,32 @@ export function ChallengeFormDialog({
                         {categories.map((cat) => (
                           <SelectItem key={cat.id} value={cat.id}>
                             {cat.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="wave_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Wave / Babak</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value || ""}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select wave (optional)" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="">No Wave</SelectItem>
+                        {waves.map((wave) => (
+                          <SelectItem key={wave.id} value={wave.id}>
+                            Wave {wave.wave_number} - {wave.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
