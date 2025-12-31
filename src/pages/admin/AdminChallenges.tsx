@@ -11,7 +11,9 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ChallengeFormDialog } from "@/components/admin/ChallengeFormDialog";
+import { ChallengeImportExport } from "@/components/admin/ChallengeImportExport";
 import { useAdminChallenges, useDeleteChallenge, useBulkUpdateChallenges, useUpdateChallenge } from "@/hooks/useAdminChallenges";
+import { useCategories } from "@/hooks/useChallenges";
 import { useWaves } from "@/hooks/useWaves";
 import { Plus, Search, MoreHorizontal, Pencil, Trash2, Eye, EyeOff, Flag, Filter } from "lucide-react";
 import { DifficultyBadge } from "@/components/ui/difficulty-badge";
@@ -19,6 +21,7 @@ import type { DifficultyLevel } from "@/lib/constants";
 
 export default function AdminChallenges() {
   const { data: challenges, isLoading } = useAdminChallenges();
+  const { data: categories = [] } = useCategories();
   const { data: waves = [] } = useWaves();
   const deleteChallenge = useDeleteChallenge();
   const updateChallenge = useUpdateChallenge();
@@ -120,10 +123,13 @@ export default function AdminChallenges() {
               Manage CTF challenges
             </p>
           </div>
-          <Button onClick={() => setFormOpen(true)} className="gap-2">
-            <Plus className="h-4 w-4" />
-            Add Challenge
-          </Button>
+          <div className="flex items-center gap-2">
+            <ChallengeImportExport categories={categories} />
+            <Button onClick={() => setFormOpen(true)} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Add Challenge
+            </Button>
+          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-wrap">

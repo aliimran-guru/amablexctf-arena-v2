@@ -74,24 +74,48 @@ export function ChallengeFormDialog({
   const form = useForm<ChallengeFormData>({
     resolver: zodResolver(challengeSchema),
     defaultValues: {
-      title: challenge?.title ?? "",
-      description: challenge?.description ?? "",
-      flag: challenge?.flag ?? "",
-      category_id: challenge?.category_id ?? "",
-      wave_id: challenge?.wave_id ?? "",
-      difficulty: (challenge?.difficulty as "easy" | "medium" | "hard" | "insane") ?? "medium",
-      scoring_type: (challenge?.scoring_type as "static" | "dynamic") ?? "dynamic",
-      static_points: challenge?.static_points ?? 100,
-      max_points: challenge?.max_points ?? 500,
-      min_points: challenge?.min_points ?? 50,
-      decay_rate: challenge?.decay_rate ?? 25,
-      is_active: challenge?.is_active ?? true,
-      is_hidden: challenge?.is_hidden ?? false,
-      author: challenge?.author ?? "",
-      source_url: challenge?.source_url ?? "",
-      docker_image: challenge?.docker_image ?? "",
+      title: "",
+      description: "",
+      flag: "",
+      category_id: "",
+      wave_id: "",
+      difficulty: "medium",
+      scoring_type: "dynamic",
+      static_points: 100,
+      max_points: 500,
+      min_points: 50,
+      decay_rate: 25,
+      is_active: true,
+      is_hidden: false,
+      author: "",
+      source_url: "",
+      docker_image: "",
     },
   });
+
+  // Reset form when dialog opens or challenge changes
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        title: challenge?.title ?? "",
+        description: challenge?.description ?? "",
+        flag: challenge?.flag ?? "",
+        category_id: challenge?.category_id ?? "",
+        wave_id: challenge?.wave_id ?? "",
+        difficulty: (challenge?.difficulty as "easy" | "medium" | "hard" | "insane") ?? "medium",
+        scoring_type: (challenge?.scoring_type as "static" | "dynamic") ?? "dynamic",
+        static_points: challenge?.static_points ?? 100,
+        max_points: challenge?.max_points ?? 500,
+        min_points: challenge?.min_points ?? 50,
+        decay_rate: challenge?.decay_rate ?? 25,
+        is_active: challenge?.is_active ?? true,
+        is_hidden: challenge?.is_hidden ?? false,
+        author: challenge?.author ?? "",
+        source_url: challenge?.source_url ?? "",
+        docker_image: challenge?.docker_image ?? "",
+      });
+    }
+  }, [open, challenge, form]);
 
   const scoringType = form.watch("scoring_type");
 
