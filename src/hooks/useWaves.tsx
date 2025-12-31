@@ -109,8 +109,17 @@ export function useAutoActivateWaves() {
             .eq("id", wave.id);
           
           if (!error) {
+            // Send global notification
+            await supabase.from("notifications").insert({
+              title: `Wave ${wave.wave_number} Started!`,
+              message: `${wave.name} is now active. Duration: ${wave.duration_hours} hours.`,
+              type: "info",
+              is_global: true,
+            });
+            
             queryClient.invalidateQueries({ queryKey: ["waves"] });
             queryClient.invalidateQueries({ queryKey: ["active-wave"] });
+            queryClient.invalidateQueries({ queryKey: ["notifications"] });
             toast.info(`Wave ${wave.wave_number} is now active!`);
           }
           break;
@@ -124,8 +133,17 @@ export function useAutoActivateWaves() {
             .eq("id", wave.id);
           
           if (!error) {
+            // Send global notification
+            await supabase.from("notifications").insert({
+              title: `Wave ${wave.wave_number} Ended`,
+              message: `${wave.name} has ended.`,
+              type: "info",
+              is_global: true,
+            });
+            
             queryClient.invalidateQueries({ queryKey: ["waves"] });
             queryClient.invalidateQueries({ queryKey: ["active-wave"] });
+            queryClient.invalidateQueries({ queryKey: ["notifications"] });
             toast.info(`Wave ${wave.wave_number} has ended!`);
           }
         }

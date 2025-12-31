@@ -15,13 +15,15 @@ import {
   Cpu,
   Skull,
   Star,
-  TrendingUp
+  TrendingUp,
+  Waves
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { useScoreboard } from "@/hooks/useScoreboard";
+import { WaveSchedule } from "@/components/waves/WaveSchedule";
 import { APP_NAME } from "@/lib/constants";
 import logo from "@/assets/logo.gif";
 
@@ -341,10 +343,33 @@ export default function Index() {
         </div>
       </section>
 
+      {/* Wave Schedule Section */}
+      <section className="relative py-24 bg-secondary/30">
+        <div className="absolute inset-0 cyber-grid opacity-30" />
+        <div className="container relative">
+          <div className="text-center mb-16">
+            <Badge variant="outline" className="mb-4 px-3 py-1 border-primary/50 bg-primary/10 text-primary">
+              <Waves className="h-3 w-3 mr-2" />
+              Competition Schedule
+            </Badge>
+            <h2 className="text-4xl md:text-5xl font-display font-bold mb-4">
+              <span className="text-primary neon-text">WAVE</span> SCHEDULE
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+              Lihat jadwal gelombang kompetisi dan waktu mulainya.
+            </p>
+          </div>
+
+          <div className="max-w-2xl mx-auto">
+            <WaveSchedule />
+          </div>
+        </div>
+      </section>
+
       {/* Leaderboard Preview */}
       {topPlayers.length > 0 && (
-        <section className="relative py-24 bg-secondary/30">
-          <div className="absolute inset-0 cyber-grid opacity-30" />
+        <section className="relative py-24">
+          <div className="absolute inset-0 matrix-bg opacity-50" />
           <div className="container relative">
             <div className="text-center mb-16">
               <Badge variant="outline" className="mb-4 px-3 py-1 border-primary/50 bg-primary/10 text-primary">
