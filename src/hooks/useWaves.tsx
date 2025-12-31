@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useEffect, useCallback } from "react";
 
 export interface Wave {
   id: string;
@@ -29,6 +30,118 @@ export function useWaves() {
   });
 }
 
+export function useActiveWave() {
+  return useQuery({
+    queryKey: ["active-wave"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("waves")
+        .select("*")
+        .eq("is_active", true)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data as Wave | null;
+    },
+  });
+}
+
+export function useWaveTimer() {
+  const { data: activeWave, isLoading } = useActiveWave();
+
+  const getWaveEndTime = useCallback(() => {
+    if (!activeWave || !activeWave.start_time) return null;
+    const startTime = new Date(activeWave.start_time);
+    const endTime = new Date(startTime.getTime() + activeWave.duration_hours * 60 * 60 * 1000);
+    return endTime;
+  }, [activeWave]);
+
+  const getTimeRemaining = useCallback(() => {
+    const endTime = getWaveEndTime();
+    if (!endTime) return null;
+    
+    const now = new Date();
+    const diff = endTime.getTime() - now.getTime();
+    
+    if (diff <= 0) return { hours: 0, minutes: 0, seconds: 0, isEnded: true };
+    
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    
+    return { hours, minutes, seconds, isEnded: false };
+  }, [getWaveEndTime]);
+
+  return {
+    activeWave,
+    isLoading,
+    getWaveEndTime,
+    getTimeRemaining,
+  };
+}
+
+// Hook to auto-activate waves based on start_time
+export function useAutoActivateWaves() {
+  const queryClient = useQueryClient();
+  const { data: waves } = useWaves();
+
+  useEffect(() => {
+    if (!waves || waves.length === 0) return;
+
+    const checkAndActivateWaves = async () => {
+      const now = new Date();
+      
+      for (const wave of waves) {
+        if (!wave.start_time) continue;
+        
+        const startTime = new Date(wave.start_time);
+        const endTime = new Date(startTime.getTime() + wave.duration_hours * 60 * 60 * 1000);
+        
+        // If current time is within wave period and wave is not active
+        if (now >= startTime && now < endTime && !wave.is_active) {
+          // Deactivate all waves first
+          await supabase.from("waves").update({ is_active: false }).neq("id", "");
+          
+          // Activate this wave
+          const { error } = await supabase
+            .from("waves")
+            .update({ is_active: true })
+            .eq("id", wave.id);
+          
+          if (!error) {
+            queryClient.invalidateQueries({ queryKey: ["waves"] });
+            queryClient.invalidateQueries({ queryKey: ["active-wave"] });
+            toast.info(`Wave ${wave.wave_number} is now active!`);
+          }
+          break;
+        }
+        
+        // If wave has ended and is still active, deactivate it
+        if (now >= endTime && wave.is_active) {
+          const { error } = await supabase
+            .from("waves")
+            .update({ is_active: false })
+            .eq("id", wave.id);
+          
+          if (!error) {
+            queryClient.invalidateQueries({ queryKey: ["waves"] });
+            queryClient.invalidateQueries({ queryKey: ["active-wave"] });
+            toast.info(`Wave ${wave.wave_number} has ended!`);
+          }
+        }
+      }
+    };
+
+    // Check immediately
+    checkAndActivateWaves();
+
+    // Check every minute
+    const interval = setInterval(checkAndActivateWaves, 60000);
+
+    return () => clearInterval(interval);
+  }, [waves, queryClient]);
+}
+
 export function useCreateWave() {
   const queryClient = useQueryClient();
 
@@ -52,6 +165,7 @@ export function useCreateWave() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["waves"] });
+      queryClient.invalidateQueries({ queryKey: ["active-wave"] });
       toast.success("Wave created successfully");
     },
     onError: (error: Error) => {
@@ -80,6 +194,7 @@ export function useUpdateWave() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["waves"] });
+      queryClient.invalidateQueries({ queryKey: ["active-wave"] });
       toast.success("Wave updated successfully");
     },
     onError: (error: Error) => {
@@ -99,6 +214,7 @@ export function useDeleteWave() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["waves"] });
+      queryClient.invalidateQueries({ queryKey: ["active-wave"] });
       toast.success("Wave deleted successfully");
     },
     onError: (error: Error) => {
@@ -125,6 +241,7 @@ export function useActivateWave() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["waves"] });
+      queryClient.invalidateQueries({ queryKey: ["active-wave"] });
       toast.success("Wave activated successfully");
     },
     onError: (error: Error) => {

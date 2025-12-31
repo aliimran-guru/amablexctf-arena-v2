@@ -2,15 +2,20 @@ import { useState, useMemo } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { ChallengeCard } from "@/components/challenges/ChallengeCard";
 import { ChallengeFilters } from "@/components/challenges/ChallengeFilters";
+import { WaveTimer } from "@/components/challenges/WaveTimer";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useChallenges, useUserSolves } from "@/hooks/useChallenges";
+import { useAutoActivateWaves } from "@/hooks/useWaves";
 import { Flag } from "lucide-react";
 import type { CategorySlug, DifficultyLevel } from "@/lib/constants";
 
 export default function Challenges() {
   const { data: challenges, isLoading } = useChallenges();
   const { data: userSolves = [] } = useUserSolves();
+  
+  // Auto-activate waves based on start_time
+  useAutoActivateWaves();
 
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
@@ -91,6 +96,11 @@ export default function Challenges() {
               {solvedCount} / {totalCount} solved
             </p>
           </div>
+        </div>
+
+        {/* Wave Timer */}
+        <div className="mb-6">
+          <WaveTimer />
         </div>
 
         {/* Filters */}
