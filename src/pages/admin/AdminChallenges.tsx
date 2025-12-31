@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -12,7 +13,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { ChallengeFormDialog } from "@/components/admin/ChallengeFormDialog";
 import { useAdminChallenges, useDeleteChallenge, useBulkUpdateChallenges, useUpdateChallenge } from "@/hooks/useAdminChallenges";
 import { useWaves } from "@/hooks/useWaves";
-import { Plus, Search, MoreHorizontal, Pencil, Trash2, Eye, EyeOff, Flag } from "lucide-react";
+import { Plus, Search, MoreHorizontal, Pencil, Trash2, Eye, EyeOff, Flag, Filter } from "lucide-react";
 import { DifficultyBadge } from "@/components/ui/difficulty-badge";
 import type { DifficultyLevel } from "@/lib/constants";
 
@@ -24,14 +25,30 @@ export default function AdminChallenges() {
   const bulkUpdate = useBulkUpdateChallenges();
   
   const [search, setSearch] = useState("");
+  const [waveFilter, setWaveFilter] = useState<string>("all");
   const [formOpen, setFormOpen] = useState(false);
   const [editingChallenge, setEditingChallenge] = useState<typeof challenges[0] | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  const filteredChallenges = challenges?.filter((c) =>
-    c.title.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredChallenges = useMemo(() => {
+    if (!challenges) return [];
+    
+    return challenges.filter((c) => {
+      // Search filter
+      if (search && !c.title.toLowerCase().includes(search.toLowerCase())) {
+        return false;
+      }
+      
+      // Wave filter
+      if (waveFilter !== "all") {
+        if (waveFilter === "none" && c.wave_id !== null) return false;
+        if (waveFilter !== "none" && c.wave_id !== waveFilter) return false;
+      }
+      
+      return true;
+    });
+  }, [challenges, search, waveFilter]);
 
   const handleEdit = (challenge: typeof challenges[0]) => {
     setEditingChallenge(challenge);
@@ -109,7 +126,7 @@ export default function AdminChallenges() {
           </Button>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-wrap">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -118,6 +135,24 @@ export default function AdminChallenges() {
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
             />
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4 text-muted-foreground" />
+            <Select value={waveFilter} onValueChange={setWaveFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by wave" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Waves</SelectItem>
+                <SelectItem value="none">No Wave</SelectItem>
+                {waves.map((wave) => (
+                  <SelectItem key={wave.id} value={wave.id}>
+                    Wave {wave.wave_number} - {wave.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           
           {selectedIds.length > 0 && (
